@@ -1,6 +1,7 @@
 import { SSTConfig } from "sst";
 import { StorageStack } from "./stacks/StorageStack";
 import { ApiStack } from "./stacks/ApiStack";
+import { QueueStack } from "./stacks/QueueStack";
 
 export default {
   config(_input) {
@@ -10,6 +11,6 @@ export default {
     };
   },
   stacks(app) {
-    app.stack(StorageStack).stack(ApiStack);
+    app.stack(StorageStack).stack(QueueStack).stack(ApiStack);
   },
 } satisfies SSTConfig;

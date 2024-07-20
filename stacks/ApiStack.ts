@@ -1,14 +1,16 @@
 import { Api, StackContext, use } from "sst/constructs";
 import { StorageStack } from "./StorageStack";
+import { QueueStack } from "./QueueStack";
 
 export function ApiStack({ stack }: StackContext) {
-  const { reservations } = use(StorageStack);
+  const { reservations: reservationsTable } = use(StorageStack);
+  const { reservations: reservationsQueue } = use(QueueStack);
 
   // Create the API
   const api = new Api(stack, "Api", {
     defaults: {
       function: {
-        bind: [reservations],
+        bind: [reservationsTable, reservationsQueue],
       },
     },
     routes: {
