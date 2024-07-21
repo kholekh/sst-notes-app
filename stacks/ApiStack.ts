@@ -20,6 +20,8 @@ export function ApiStack({ stack }: StackContext) {
         "packages/functions/src/getAll.main",
       "GET /apartments/{apartment}/reservations/{date}":
         "packages/functions/src/getOne.main",
+      "DELETE /apartments/{apartment}/reservations/{date}":
+        "packages/functions/src/deleteOne.main",
     },
   });
 
