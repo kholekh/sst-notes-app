@@ -1,8 +1,9 @@
 import { Table } from "sst/node/table";
 import handler from "@notes/core/handler";
 import dynamoDb from "@notes/core/dynamodb";
+import { APIGatewayProxyEvent } from "aws-lambda";
 
-export const main = handler(async (event) => {
+export const main = handler(async (event: APIGatewayProxyEvent) => {
   const params = {
     TableName: Table.Reservations.tableName,
     // 'Key' defines the partition key and sort key of

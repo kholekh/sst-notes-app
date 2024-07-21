@@ -1,4 +1,4 @@
-import { SQSEvent } from "aws-lambda";
+import { APIGatewayProxyEvent, Context, SQSEvent } from "aws-lambda";
 import { Queue } from "sst/node/queue";
 import { Table } from "sst/node/table";
 import handler from "@notes/core/handler";
@@ -11,44 +11,63 @@ interface IReservation {
   readonly guestId: string;
 }
 
-export const main = handler(async (event) => {
+export const main = handler(async (event: APIGatewayProxyEvent) => {
   const apartmentId = event?.pathParameters?.apartment;
   const reservationId = event?.pathParameters?.date; //TODO: validate format YYYYMMDD
   const guestId = "123"; //TODO: form Cognito
 
   await sqs.sendMessage({
     // Get the queue url from the environment variable
-    QueueUrl: Queue.Queue.queueUrl,
+    QueueUrl: Queue.Reservations.queueUrl,
     MessageBody: JSON.stringify({
       apartmentId,
       reservationId,
       guestId,
     } as IReservation),
+    MessageGroupId: apartmentId,
   });
 
   return "Message queued!";
 });
 
-export const consumer = async (event: SQSEvent) => {
-  const [record] = event.Records;
-  console.log(`Message processed: "${record?.body}"`);
+export const consumer = handler(
+  async (event: SQSEvent, context: Context): Promise<string> => {
+    const [record] = event.Records;
+    console.log(`Message processed: "${record?.body}"`);
 
-  const { apartmentId, reservationId, guestId } = JSON.parse(
-    record?.body
-  ) as IReservation;
+    const { apartmentId, reservationId, guestId } = JSON.parse(
+      record?.body
+    ) as IReservation;
 
-  const params = {
-    TableName: Table.Reservations.tableName,
-    Item: {
-      apartmentId,
-      reservationId,
-      guestId,
-      createdAt: Date.now(),
-      updatedAt: Date.now(),
-    },
-  };
+    const ReservationsTable = Table.Reservations.tableName;
 
-  await dynamoDb.put(params);
+    const getOneParams = {
+      TableName: ReservationsTable,
+      Key: {
+        apartmentId,
+        reservationId,
+      },
+    };
 
-  return JSON.stringify(params.Item);
-};
+    const result = await dynamoDb.get(getOneParams);
+    if (result.Item) {
+      console.log("Reservations for this apartment/date already exist.");
+      return JSON.stringify(result.Item);
+    }
+
+    const putOneParams = {
+      TableName: ReservationsTable,
+      Item: {
+        apartmentId,
+        reservationId,
+        guestId,
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+      },
+    };
+
+    await dynamoDb.put(putOneParams);
+
+    return JSON.stringify(putOneParams.Item);
+  }
+);
