@@ -11,19 +11,21 @@ interface IReservation {
   readonly guestId: string;
 }
 
-export const main = handler(async (event: APIGatewayProxyEvent) => {
-  const apartmentId = event?.pathParameters?.apartment;
-  const reservationId = event?.pathParameters?.date; //TODO: validate format YYYYMMDD
+export const main = handler(async (event: APIGatewayProxyEvent, context) => {
+  const requestId = context.awsRequestId;
+  const apartmentId = event?.pathParameters?.apartment!;
+  const reservationId = event?.pathParameters?.date!; //TODO: validate format YYYYMMDD
   const guestId = "123"; //TODO: form Cognito
+  const reservation: IReservation = {
+    apartmentId,
+    reservationId,
+    guestId,
+  };
 
   await sqs.sendMessage({
     // Get the queue url from the environment variable
     QueueUrl: Queue.Reservations.queueUrl,
-    MessageBody: JSON.stringify({
-      apartmentId,
-      reservationId,
-      guestId,
-    } as IReservation),
+    MessageBody: JSON.stringify({ ...reservation, requestId }),
     MessageGroupId: apartmentId,
   });
 
