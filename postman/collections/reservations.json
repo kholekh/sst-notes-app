@@ -1,0 +1,115 @@
+{
+	"info": {
+		"_postman_id": "c011fcac-253a-4fa3-8182-3786de333b5d",
+		"name": "reservations",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_uid": "13396614-c011fcac-253a-4fa3-8182-3786de333b5d"
+	},
+	"item": [
+		{
+			"name": "get One",
+			"id": "2a96306a-326c-4934-8e6c-7b8bac465129",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{BASE_URL}}/apartments/423/reservations/20240706",
+					"host": [
+						"{{BASE_URL}}"
+					],
+					"path": [
+						"apartments",
+						"423",
+						"reservations",
+						"20240706"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get All",
+			"id": "2f85d220-cf2f-46ac-a16e-36e68c595b46",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{BASE_URL}}/apartments/423/reservations?from=20240706&to=20240708",
+					"host": [
+						"{{BASE_URL}}"
+					],
+					"path": [
+						"apartments",
+						"423",
+						"reservations"
+					],
+					"query": [
+						{
+							"key": "from",
+							"value": "20240706"
+						},
+						{
+							"key": "to",
+							"value": "20240708"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "creaate One",
+			"id": "3212e83f-463a-499c-8639-458cb12fe75b",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "{{BASE_URL}}/apartments/421/reservations/20240811",
+					"host": [
+						"{{BASE_URL}}"
+					],
+					"path": [
+						"apartments",
+						"421",
+						"reservations",
+						"20240811"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "delete One",
+			"id": "4e76cb5c-3ae2-458e-a007-cc63cffb66a7",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{BASE_URL}}/apartments/423/reservations/20240712",
+					"host": [
+						"{{BASE_URL}}"
+					],
+					"path": [
+						"apartments",
+						"423",
+						"reservations",
+						"20240712"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
