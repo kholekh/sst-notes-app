@@ -4,6 +4,7 @@ type TEvent = APIGatewayProxyEvent | SQSEvent;
 
 interface IResponse {
   readonly statusCode: number;
+  readonly headers?: Record<string, string>;
   readonly body: string;
 }
 
@@ -21,25 +22,30 @@ export default function handler(
   lambda: TLambdaAPI | TLambdaSQS
 ): TLambdaAPI<IResponse> | TLambdaSQS<IResponse> {
   return async function (event: TEvent, context: Context): Promise<IResponse> {
-    let body, statusCode;
+    const { body, statusCode } = await (async (): Promise<IResponse> => {
+      try {
+        // Run the Lambda
+        const body = await lambda(event as any, context);
+        const statusCode = 200;
 
-    try {
-      // Run the Lambda
-      body = await lambda(event as any, context);
-      statusCode = 200;
-    } catch (error) {
-      console.error(error);
+        return { statusCode, body };
+      } catch (error) {
+        console.error(error);
 
-      statusCode = 500;
-      body = JSON.stringify({
-        error: error instanceof Error ? error.message : String(error),
-      });
-    }
+        const statusCode = 500;
+        const body = JSON.stringify({
+          error: error instanceof Error ? error.message : String(error),
+        });
+
+        return { statusCode, body };
+      }
+    })();
 
     // Return HTTP response
     return {
-      body,
       statusCode,
+      headers: { "Content-Type": "application/json" },
+      body,
     };
   };
 }

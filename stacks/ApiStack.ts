@@ -9,19 +9,24 @@ export function ApiStack({ stack }: StackContext) {
   // Create the API
   const api = new Api(stack, "Api", {
     defaults: {
+      // authorizer: "iam",
       function: {
         bind: [reservationsTable, reservationsQueue],
       },
     },
     routes: {
-      "POST /apartments/{apartment}/reservations/{date}":
-        "packages/functions/src/createOne.main",
+      "POST /apartments/{apartment}/reservations/{date}": {
+        authorizer: "iam",
+        function: "packages/functions/src/createOne.main",
+      },
       "GET /apartments/{apartment}/reservations":
         "packages/functions/src/getAll.main",
       "GET /apartments/{apartment}/reservations/{date}":
         "packages/functions/src/getOne.main",
-      "DELETE /apartments/{apartment}/reservations/{date}":
-        "packages/functions/src/deleteOne.main",
+      "DELETE /apartments/{apartment}/reservations/{date}": {
+        authorizer: "iam",
+        function: "packages/functions/src/deleteOne.main",
+      },
     },
   });
 

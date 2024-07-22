@@ -1,3 +1,4 @@
+import auth from "@notes/core/auth";
 import dynamoDb from "@notes/core/dynamodb";
 import handler from "@notes/core/handler";
 import { APIGatewayProxyEvent } from "aws-lambda";
@@ -6,7 +7,7 @@ import { Table } from "sst/node/table";
 export const main = handler(async (event: APIGatewayProxyEvent, context) => {
   const apartmentId = event?.pathParameters?.apartment!;
   const reservationId = event?.pathParameters?.date!; //TODO: validate format YYYYMMDD
-  const guestId = "123"; //TODO: form Cognito
+  const guestId = auth.getGuest(event);
 
   const params = {
     TableName: Table.Reservations.tableName,

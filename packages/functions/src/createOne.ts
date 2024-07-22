@@ -1,9 +1,11 @@
 import { APIGatewayProxyEvent, Context, SQSEvent } from "aws-lambda";
 import { Queue } from "sst/node/queue";
 import { Table } from "sst/node/table";
+import auth from "@notes/core/auth";
 import handler from "@notes/core/handler";
 import dynamoDb from "@notes/core/dynamodb";
 import sqs from "@notes/core/queue";
+import { CognitoIdentity, IAM } from "aws-sdk";
 
 interface IReservation {
   readonly apartmentId: string;
@@ -15,7 +17,7 @@ export const main = handler(async (event: APIGatewayProxyEvent, context) => {
   const requestId = context.awsRequestId;
   const apartmentId = event?.pathParameters?.apartment!;
   const reservationId = event?.pathParameters?.date!; //TODO: validate format YYYYMMDD
-  const guestId = "123"; //TODO: form Cognito
+  const guestId = auth.getGuest(event);
   const reservation: IReservation = {
     apartmentId,
     reservationId,
