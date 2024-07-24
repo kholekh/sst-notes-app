@@ -4,7 +4,7 @@ type TEvent = APIGatewayProxyEvent | SQSEvent;
 
 interface IResponse {
   readonly statusCode: number;
-  readonly headers?: Record<string, string>;
+  readonly headers?: Record<string, any>;
   readonly body: string;
 }
 
@@ -44,7 +44,11 @@ export default function handler(
     // Return HTTP response
     return {
       statusCode,
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Credentials": true,
+      },
       body,
     };
   };

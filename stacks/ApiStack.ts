@@ -14,6 +14,7 @@ export function ApiStack({ stack }: StackContext) {
         bind: [reservationsTable, reservationsQueue],
       },
     },
+    cors: true,
     routes: {
       "POST /apartments/{apartment}/reservations/{date}": {
         authorizer: "iam",
