@@ -19,5 +19,7 @@ export function QueueStack({ stack }: StackContext) {
     },
   });
 
-  return { reservations };
+  return {
+    reservations,
+  };
 }
