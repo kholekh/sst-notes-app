@@ -31,7 +31,7 @@ export const main = handler(async (event: APIGatewayProxyEvent, context) => {
     MessageGroupId: apartmentId,
   });
 
-  return "Message queued!";
+  return JSON.stringify({ status: "Message queued!" });
 });
 
 export const consumer = handler(

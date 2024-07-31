@@ -1,3 +1,4 @@
+import { API } from "aws-amplify";
 import { useEffect, useRef, useState } from "react";
 import { PickersDayProps } from "@mui/lab";
 import { Badge } from "@mui/material";
@@ -8,29 +9,32 @@ import {
   PickersDay,
 } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { PickerSelectionState } from "@mui/x-date-pickers/internals";
 import dayjs, { Dayjs } from "dayjs";
-
-function getRandomNumber(min: number, max: number) {
-  return Math.round(Math.random() * (max - min) + min);
-}
+import { useAppContext } from "../lib/ContextLib";
 
 /**
  * Mimic fetch with abort controller https://developer.mozilla.org/en-US/docs/Web/API/AbortController/abort
  * ⚠️ No IE11 support
  */
-function fakeFetch(date: Dayjs, { signal }: { signal: AbortSignal }) {
+function fetchReservations(date: Dayjs, { signal }: { signal: AbortSignal }) {
   return new Promise<{ daysToHighlight: number[] }>((resolve, reject) => {
-    const timeout = setTimeout(() => {
-      const daysInMonth = date.daysInMonth();
-      const daysToHighlight = [1, 2, 3].map(() =>
-        getRandomNumber(1, daysInMonth)
-      );
-
-      resolve({ daysToHighlight });
-    }, 500);
+    const dateFormat = date.format("YYYYMM");
+    const queryStringParameters = {
+      from: dateFormat + "01",
+      to: dateFormat + "31",
+    };
+    API.get("obriy", `/apartments/42/reservations`, { queryStringParameters })
+      .then((res: { Items: { reservationId: string }[] }) => {
+        console.log(res);
+        const daysToHighlight = res.Items.map(
+          ({ reservationId }) => +reservationId.slice(-2)
+        );
+        resolve({ daysToHighlight });
+      })
+      .catch((err) => reject(err.response));
 
     signal.onabort = () => {
-      clearTimeout(timeout);
       reject(new DOMException("aborted", "AbortError"));
     };
   });
@@ -72,12 +76,13 @@ function ServerDay(
 
 export default function Reservation() {
   const requestAbortController = useRef<AbortController | null>(null);
+  const { isAuthenticated } = useAppContext();
   const [isLoading, setIsLoading] = useState(false);
   const [highlightedDays, setHighlightedDays] = useState([1, 2, 15]);
 
   const fetchHighlightedDays = (date: Dayjs) => {
     const controller = new AbortController();
-    fakeFetch(date, {
+    fetchReservations(date, {
       signal: controller.signal,
     })
       .then(({ daysToHighlight }) => {
@@ -112,11 +117,22 @@ export default function Reservation() {
     fetchHighlightedDays(date);
   };
 
+  function handleDateChange(
+    date: Dayjs,
+    selectedState: PickerSelectionState | undefined
+  ) {
+    if (!isAuthenticated || selectedState !== "finish") return;
+
+    const reserve = dayjs(date).format("YYYYMMDD");
+    API.post("obriy", `/apartments/42/reservations/${reserve}`, {});
+  }
+
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       <DateCalendar
         defaultValue={initialValue}
         loading={isLoading}
+        onChange={handleDateChange}
         onMonthChange={handleMonthChange}
         renderLoading={() => <DayCalendarSkeleton />}
         slots={{

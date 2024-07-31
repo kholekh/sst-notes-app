@@ -29,5 +29,5 @@ export const main = handler(async (event: APIGatewayProxyEvent, context) => {
 
   await dynamoDb.delete(params);
 
-  return JSON.stringify("Reservation deleted!");
+  return JSON.stringify({ status: "Reservation deleted!" });
 });
