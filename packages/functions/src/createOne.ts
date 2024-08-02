@@ -5,7 +5,7 @@ import auth from "@notes/core/auth";
 import handler from "@notes/core/handler";
 import dynamoDb from "@notes/core/dynamodb";
 import sqs from "@notes/core/queue";
-import { CognitoIdentity, IAM } from "aws-sdk";
+import pubsub from "@notes/core/pubsub";
 
 interface IReservation {
   readonly apartmentId: string;
@@ -13,7 +13,7 @@ interface IReservation {
   readonly guestId: string;
 }
 
-export const main = handler(async (event: APIGatewayProxyEvent, context) => {
+export const main = handler(async (event: APIGatewayProxyEvent, context: Context) => {
   const requestId = context.awsRequestId;
   const apartmentId = event?.pathParameters?.apartment!;
   const reservationId = event?.pathParameters?.date!; //TODO: validate format YYYYMMDD
@@ -71,6 +71,8 @@ export const consumer = handler(
     };
 
     await dynamoDb.put(putOneParams);
+
+    await pubsub.publish("reserve", reservationId);
 
     return JSON.stringify(putOneParams.Item);
   }
